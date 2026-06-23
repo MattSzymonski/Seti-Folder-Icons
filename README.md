@@ -63,9 +63,9 @@ You can invoke this command from the Command Palette (**Ctrl + Shift + P**) by t
 
 ## Preview
 
-![Screenshot (dark)](https://github.com/L-IGH-T/Seti-folder/raw/main/preview/preview-dark.png)
+![Screenshot (dark)](https://github.com/MattSzymonski/Seti-Folder-Icons/raw/main/preview/preview-dark.png)
 
-![Screenshot (light)](https://github.com/L-IGH-T/Seti-folder/raw/main/preview/preview-light.png)
+![Screenshot (light)](https://github.com/MattSzymonski/Seti-Folder-Icons/raw/main/preview/preview-light.png)
 
 ### Original Seti screenshot
 

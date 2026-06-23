@@ -3,33 +3,33 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 interface IconDefinition {
-	iconPath?: string;
-	fontCharacter?: string;
-	fontColor?: string;
+    iconPath?: string;
+    fontCharacter?: string;
+    fontColor?: string;
 }
 
 interface IconThemeJson {
-	iconDefinitions: Record<string, IconDefinition>;
-	folder?: string;
-	folderExpanded?: string;
-	file?: string;
-	fileExtensions?: Record<string, string>;
-	fileNames?: Record<string, string>;
-	languageIds?: Record<string, string>;
-	folderNames?: Record<string, string>;
-	folderNamesExpanded?: Record<string, string>;
-	light?: {
-		file?: string;
-		folder?: string;
-		folderExpanded?: string;
-		fileExtensions?: Record<string, string>;
-		fileNames?: Record<string, string>;
-		languageIds?: Record<string, string>;
-		folderNames?: Record<string, string>;
-		folderNamesExpanded?: Record<string, string>;
-	};
-	highContrast?: Record<string, unknown>;
-	version?: string;
+    iconDefinitions: Record<string, IconDefinition>;
+    folder?: string;
+    folderExpanded?: string;
+    file?: string;
+    fileExtensions?: Record<string, string>;
+    fileNames?: Record<string, string>;
+    languageIds?: Record<string, string>;
+    folderNames?: Record<string, string>;
+    folderNamesExpanded?: Record<string, string>;
+    light?: {
+        file?: string;
+        folder?: string;
+        folderExpanded?: string;
+        fileExtensions?: Record<string, string>;
+        fileNames?: Record<string, string>;
+        languageIds?: Record<string, string>;
+        folderNames?: Record<string, string>;
+        folderNamesExpanded?: Record<string, string>;
+    };
+    highContrast?: Record<string, unknown>;
+    version?: string;
 }
 
 /**
@@ -39,131 +39,131 @@ interface IconThemeJson {
  * Otherwise returns the original ID.
  */
 function getLightIconId(darkIconId: string, iconDefinitions: Record<string, IconDefinition>): string {
-	if (darkIconId.endsWith('_light')) {
-		return darkIconId;
-	}
-	const lightId = darkIconId + '_light';
-	if (lightId in iconDefinitions) {
-		return lightId;
-	}
-	// For folder icons that don't have separate light variants
-	return darkIconId;
+    if (darkIconId.endsWith('_light')) {
+        return darkIconId;
+    }
+    const lightId = darkIconId + '_light';
+    if (lightId in iconDefinitions) {
+        return lightId;
+    }
+    // For folder icons that don't have separate light variants
+    return darkIconId;
 }
 
 function generateIconTheme(
-	baseTheme: IconThemeJson,
-	useOnAllFolders: boolean,
-	folderAssociations: Record<string, string>
+    baseTheme: IconThemeJson,
+    useOnAllFolders: boolean,
+    folderAssociations: Record<string, string>
 ): IconThemeJson {
-	// Deep clone to avoid mutating the base
-	const theme: IconThemeJson = JSON.parse(JSON.stringify(baseTheme));
+    // Deep clone to avoid mutating the base
+    const theme: IconThemeJson = JSON.parse(JSON.stringify(baseTheme));
 
-	const iconDefs = theme.iconDefinitions;
+    const iconDefs = theme.iconDefinitions;
 
-	// Handle "useOnAllFolders" setting
-	if (useOnAllFolders) {
-		// Keep the default folder icons (already in base theme)
-		// Don't modify folder/folderExpanded — they stay as in the base
-	} else {
-		// Remove default folder icons — only folderNames associations will apply
-		delete theme.folder;
-		delete theme.folderExpanded;
-		if (theme.light) {
-			delete theme.light.folder;
-			delete theme.light.folderExpanded;
-		}
-	}
+    // Handle "useOnAllFolders" setting
+    if (useOnAllFolders) {
+        // Keep the default folder icons (already in base theme)
+        // Don't modify folder/folderExpanded — they stay as in the base
+    } else {
+        // Remove default folder icons — only folderNames associations will apply
+        delete theme.folder;
+        delete theme.folderExpanded;
+        if (theme.light) {
+            delete theme.light.folder;
+            delete theme.light.folderExpanded;
+        }
+    }
 
-	// Handle "folderAssociations" setting
-	const folderNames: Record<string, string> = {};
-	const folderNamesExpanded: Record<string, string> = {};
-	const folderNamesLight: Record<string, string> = {};
-	const folderNamesExpandedLight: Record<string, string> = {};
+    // Handle "folderAssociations" setting
+    const folderNames: Record<string, string> = {};
+    const folderNamesExpanded: Record<string, string> = {};
+    const folderNamesLight: Record<string, string> = {};
+    const folderNamesExpandedLight: Record<string, string> = {};
 
-	for (const [folderName, iconId] of Object.entries(folderAssociations)) {
-		if (!folderName || !iconId) {
-			continue;
-		}
+    for (const [folderName, iconId] of Object.entries(folderAssociations)) {
+        if (!folderName || !iconId) {
+            continue;
+        }
 
-		// Verify the icon exists in definitions
-		if (!(iconId in iconDefs)) {
-			console.warn(`Seti Folder Icons: Icon "${iconId}" not found for folder "${folderName}". Skipping.`);
-			continue;
-		}
+        // Verify the icon exists in definitions
+        if (!(iconId in iconDefs)) {
+            console.warn(`Seti Folder Icons: Icon "${iconId}" not found for folder "${folderName}". Skipping.`);
+            continue;
+        }
 
-		// Dark theme
-		folderNames[folderName] = iconId;
-		// Use _folder_open for expanded if available, otherwise the same icon
-		folderNamesExpanded[folderName] = '_folder_open' in iconDefs ? '_folder_open' : iconId;
+        // Dark theme
+        folderNames[folderName] = iconId;
+        // Use _folder_open for expanded if available, otherwise the same icon
+        folderNamesExpanded[folderName] = '_folder_open' in iconDefs ? '_folder_open' : iconId;
 
-		// Light theme
-		const lightIconId = getLightIconId(iconId, iconDefs);
-		folderNamesLight[folderName] = lightIconId;
-		folderNamesExpandedLight[folderName] = '_folder_open' in iconDefs ? '_folder_open' : lightIconId;
-	}
+        // Light theme
+        const lightIconId = getLightIconId(iconId, iconDefs);
+        folderNamesLight[folderName] = lightIconId;
+        folderNamesExpandedLight[folderName] = '_folder_open' in iconDefs ? '_folder_open' : lightIconId;
+    }
 
-	// Only add folderNames if there are associations
-	if (Object.keys(folderNames).length > 0) {
-		theme.folderNames = folderNames;
-		theme.folderNamesExpanded = folderNamesExpanded;
-	}
+    // Only add folderNames if there are associations
+    if (Object.keys(folderNames).length > 0) {
+        theme.folderNames = folderNames;
+        theme.folderNamesExpanded = folderNamesExpanded;
+    }
 
-	if (Object.keys(folderNamesLight).length > 0) {
-		if (!theme.light) {
-			theme.light = {};
-		}
-		theme.light.folderNames = folderNamesLight;
-		theme.light.folderNamesExpanded = folderNamesExpandedLight;
-	}
+    if (Object.keys(folderNamesLight).length > 0) {
+        if (!theme.light) {
+            theme.light = {};
+        }
+        theme.light.folderNames = folderNamesLight;
+        theme.light.folderNamesExpanded = folderNamesExpandedLight;
+    }
 
-	return theme;
+    return theme;
 }
 
 function writeThemeFile(context: vscode.ExtensionContext, theme: IconThemeJson): void {
-	const themePath = path.join(context.extensionPath, 'icons', 'vs-seti-icon-theme.json');
-	fs.writeFileSync(themePath, JSON.stringify(theme, null, '\t'), 'utf-8');
+    const themePath = path.join(context.extensionPath, 'icons', 'vs-seti-icon-theme.json');
+    fs.writeFileSync(themePath, JSON.stringify(theme, null, '\t'), 'utf-8');
 }
 
 function loadBaseTheme(context: vscode.ExtensionContext): IconThemeJson {
-	// Try to load the base template (which is the original unmodified JSON)
-	const basePath = path.join(context.extensionPath, 'icons', 'vs-seti-icon-theme.base.json');
-	if (fs.existsSync(basePath)) {
-		const raw = fs.readFileSync(basePath, 'utf-8');
-		return JSON.parse(raw) as IconThemeJson;
-	}
+    // Try to load the base template (which is the original unmodified JSON)
+    const basePath = path.join(context.extensionPath, 'icons', 'vs-seti-icon-theme.base.json');
+    if (fs.existsSync(basePath)) {
+        const raw = fs.readFileSync(basePath, 'utf-8');
+        return JSON.parse(raw) as IconThemeJson;
+    }
 
-	// Fallback: load the current theme file (might already be generated)
-	const themePath = path.join(context.extensionPath, 'icons', 'vs-seti-icon-theme.json');
-	const raw = fs.readFileSync(themePath, 'utf-8');
-	return JSON.parse(raw) as IconThemeJson;
+    // Fallback: load the current theme file (might already be generated)
+    const themePath = path.join(context.extensionPath, 'icons', 'vs-seti-icon-theme.json');
+    const raw = fs.readFileSync(themePath, 'utf-8');
+    return JSON.parse(raw) as IconThemeJson;
 }
 
 function getWebviewContent(
-	icons: Record<string, IconDefinition>,
-	fontUri: vscode.Uri,
-	scriptUri: vscode.Uri,
-	styleUri: vscode.Uri
+    icons: Record<string, IconDefinition>,
+    fontUri: vscode.Uri,
+    scriptUri: vscode.Uri,
+    styleUri: vscode.Uri
 ): string {
-	// Build icon cards HTML
-	const iconEntries = Object.entries(icons).sort(([a], [b]) => a.localeCompare(b));
+    // Build icon cards HTML
+    const iconEntries = Object.entries(icons).sort(([a], [b]) => a.localeCompare(b));
 
-	const iconCards = iconEntries.map(([id, def]) => {
-		let previewHtml: string;
-		if (def.fontCharacter) {
-			// Font-based icon — render the character
-			const charCode = def.fontCharacter.replace(/\\\\/g, '\\');
-			const color = def.fontColor || 'var(--vscode-foreground)';
-			previewHtml = `<span class="icon-preview font-icon" style="color:${color};">${charCode}</span>`;
-		} else if (def.iconPath) {
-			// SVG-based icon — show a placeholder indicator
-			previewHtml = `<span class="icon-preview svg-icon">SVG</span>`;
-		} else {
-			previewHtml = `<span class="icon-preview unknown-icon">?</span>`;
-		}
+    const iconCards = iconEntries.map(([id, def]) => {
+        let previewHtml: string;
+        if (def.fontCharacter) {
+            // Font-based icon — render the character
+            const charCode = def.fontCharacter.replace(/\\\\/g, '\\');
+            const color = def.fontColor || 'var(--vscode-foreground)';
+            previewHtml = `<span class="icon-preview font-icon" style="color:${color};">${charCode}</span>`;
+        } else if (def.iconPath) {
+            // SVG-based icon — show a placeholder indicator
+            previewHtml = `<span class="icon-preview svg-icon">SVG</span>`;
+        } else {
+            previewHtml = `<span class="icon-preview unknown-icon">?</span>`;
+        }
 
-		const escapedId = id.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const escapedId = id.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
-		return `
+        return `
 		<div class="icon-card"
 		     title="${escapedId}"
 		     data-icon-id="${escapedId}"
@@ -171,9 +171,9 @@ function getWebviewContent(
 			<div class="icon-preview-wrapper">${previewHtml}</div>
 			<div class="icon-name">${escapedId}</div>
 		</div>`;
-	}).join('\n');
+    }).join('\n');
 
-	return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
@@ -378,77 +378,77 @@ function getWebviewContent(
 }
 
 function showIconBrowser(context: vscode.ExtensionContext): void {
-	const panel = vscode.window.createWebviewPanel(
-		'setiFolder.iconBrowser',
-		'Seti Folder Icons',
-		vscode.ViewColumn.Active,
-		{
-			enableScripts: true,
-			retainContextWhenHidden: true,
-			localResourceRoots: [
-				vscode.Uri.joinPath(context.extensionUri, 'icons')
-			]
-		}
-	);
+    const panel = vscode.window.createWebviewPanel(
+        'setiFolder.iconBrowser',
+        'Seti Folder Icons',
+        vscode.ViewColumn.Active,
+        {
+            enableScripts: true,
+            retainContextWhenHidden: true,
+            localResourceRoots: [
+                vscode.Uri.joinPath(context.extensionUri, 'icons')
+            ]
+        }
+    );
 
-	// Load base theme to get icon definitions
-	const baseTheme = loadBaseTheme(context);
-	const iconDefs = baseTheme.iconDefinitions;
+    // Load base theme to get icon definitions
+    const baseTheme = loadBaseTheme(context);
+    const iconDefs = baseTheme.iconDefinitions;
 
-	// Get URI for the seti font
-	const fontUri = panel.webview.asWebviewUri(
-		vscode.Uri.joinPath(context.extensionUri, 'icons', 'seti.woff')
-	);
+    // Get URI for the seti font
+    const fontUri = panel.webview.asWebviewUri(
+        vscode.Uri.joinPath(context.extensionUri, 'icons', 'seti.woff')
+    );
 
-	// Set the webview HTML
-	panel.webview.html = getWebviewContent(iconDefs, fontUri, vscode.Uri.parse(''), vscode.Uri.parse(''));
+    // Set the webview HTML
+    panel.webview.html = getWebviewContent(iconDefs, fontUri, vscode.Uri.parse(''), vscode.Uri.parse(''));
 
-	// Handle messages from the webview
-	panel.webview.onDidReceiveMessage(
-		async (message) => {
-			if (message.command === 'copyIconId') {
-				const iconId: string = message.iconId;
-				await vscode.env.clipboard.writeText(iconId);
-				vscode.window.showInformationMessage(
-					`Icon "${iconId}" copied to clipboard. Use it in your \`setiFolder.folderAssociations\` settings.`
-				);
-			}
-		},
-		undefined,
-		context.subscriptions
-	);
+    // Handle messages from the webview
+    panel.webview.onDidReceiveMessage(
+        async (message) => {
+            if (message.command === 'copyIconId') {
+                const iconId: string = message.iconId;
+                await vscode.env.clipboard.writeText(iconId);
+                vscode.window.showInformationMessage(
+                    `Icon "${iconId}" copied to clipboard. Use it in your \`setiFolder.folderAssociations\` settings.`
+                );
+            }
+        },
+        undefined,
+        context.subscriptions
+    );
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-	function applySettings(): void {
-		const config = vscode.workspace.getConfiguration('setiFolder');
-		const useOnAllFolders = config.get<boolean>('useOnAllFolders', true);
-		const folderAssociations = config.get<Record<string, string>>('folderAssociations', {});
+    function applySettings(): void {
+        const config = vscode.workspace.getConfiguration('setiFolder');
+        const useOnAllFolders = config.get<boolean>('useOnAllFolders', true);
+        const folderAssociations = config.get<Record<string, string>>('folderAssociations', {});
 
-		const baseTheme = loadBaseTheme(context);
-		const generatedTheme = generateIconTheme(baseTheme, useOnAllFolders, folderAssociations);
-		writeThemeFile(context, generatedTheme);
-	}
+        const baseTheme = loadBaseTheme(context);
+        const generatedTheme = generateIconTheme(baseTheme, useOnAllFolders, folderAssociations);
+        writeThemeFile(context, generatedTheme);
+    }
 
-	// Apply settings on activation
-	applySettings();
+    // Apply settings on activation
+    applySettings();
 
-	// Watch for configuration changes
-	const configDisposable = vscode.workspace.onDidChangeConfiguration((e) => {
-		if (e.affectsConfiguration('setiFolder.useOnAllFolders') ||
-			e.affectsConfiguration('setiFolder.folderAssociations')) {
-			applySettings();
-		}
-	});
+    // Watch for configuration changes
+    const configDisposable = vscode.workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration('setiFolder.useOnAllFolders') ||
+            e.affectsConfiguration('setiFolder.folderAssociations')) {
+            applySettings();
+        }
+    });
 
-	// Register the "Show Available Icons" command
-	const commandDisposable = vscode.commands.registerCommand('setiFolder.showAvailableIcons', () => {
-		showIconBrowser(context);
-	});
+    // Register the "Show Available Icons" command
+    const commandDisposable = vscode.commands.registerCommand('setiFolder.showAvailableIcons', () => {
+        showIconBrowser(context);
+    });
 
-	context.subscriptions.push(configDisposable, commandDisposable);
+    context.subscriptions.push(configDisposable, commandDisposable);
 }
 
 export function deactivate(): void {
-	// Nothing to clean up
+    // Nothing to clean up
 }
