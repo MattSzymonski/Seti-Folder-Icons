@@ -1,12 +1,19 @@
 {
 	"name": "vscode-theme-seti-folder",
 	"version": "1.3.0",
-	"displayName": "Seti folder",
+	"displayName": "Seti Folder Icons",
 	"description": "Seti icons with folder for VS Code",
 	"publisher": "l-igh-t",
 	"license": "MIT",
 	"icon": "icons/setiWfolder.png",
+	"main": "./out/extension.js",
+	"activationEvents": [
+		"onStartupFinished"
+	],
 	"scripts": {
+		"vscode:prepublish": "tsc -p ./",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
 		"update": "node ./build/update-icon-theme.js",
 		"view": "http-server --p 3000 --global /icons/preview.html"
 	},
@@ -15,22 +22,53 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/L-IGH-T/Seti-folder"
+		"url": "https://github.com/MattSzymonski/Seti-Folder-Icons"
 	},
 	"engines": {
 		"vscode": "*"
 	},
 	"contributes": {
+		"commands": [
+			{
+				"command": "setiFolder.showAvailableIcons",
+				"title": "Seti Folder Icons: Show Available Icons",
+				"icon": "$(list-tree)"
+			}
+		],
+		"configuration": {
+			"title": "Seti Folder Icons",
+			"properties": {
+				"setiFolder.useOnAllFolders": {
+					"type": "boolean",
+					"default": true,
+					"description": "Apply Seti Folder Icons to all folders. When disabled, only folders matching folder associations will get custom icons."
+				},
+				"setiFolder.folderAssociations": {
+					"type": "object",
+					"default": {},
+					"description": "Map folder names to icon names. For example: { \"src\": \"_folder_dark\", \"node_modules\": \"_npm\", \"test\": \"_javascript_1\" }. Available icon names can be found in the icon theme definition file.",
+					"patternProperties": {
+						".*": {
+							"type": "string",
+							"description": "The icon definition ID to use for this folder name."
+						}
+					}
+				}
+			}
+		},
 		"iconThemes": [
 			{
 				"id": "vs-seti-folder",
-				"label": "Seti folder",
+				"label": "Seti Folder Icons",
 				"path": "./icons/vs-seti-icon-theme.json"
 			}
 		]
 	},
 	"devDependencies": {
+		"@types/node": "^26.0.0",
+		"@types/vscode": "^1.60.0",
 		"http-server": "^14.1.1",
-		"minimatch": "^9.0.1"
+		"minimatch": "^9.0.1",
+		"typescript": "^5.0.0"
 	}
 }

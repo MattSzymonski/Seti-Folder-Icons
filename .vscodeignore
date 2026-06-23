@@ -1,7 +1,8 @@
 
 
 build/
-
+src/
+tsconfig.json
 .gitignore
 .env
 node_modules
